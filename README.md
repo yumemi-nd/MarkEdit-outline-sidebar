@@ -90,6 +90,7 @@ Add an `extension.markeditOutlineSidebar` object to your MarkEdit [`settings.jso
     "position": "right",          // "right" | "left" — which edge to dock to
     "onLaunch": "remember",        // "remember" last state | "open" always | "closed" always
     "highlightMode": "scroll",     // "scroll" follows the view | "insertionPoint" follows the cursor
+    "colorScheme": "auto",         // "auto" follows the editor theme | "light" | "dark" — pin the sidebar colors
     "shortcut": { "key": "l", "modifiers": ["Command", "Shift"] }
   }
 }

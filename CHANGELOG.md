@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- `colorScheme` setting (`auto`, `light`, `dark`) to pin the sidebar colors regardless of the editor theme.
+
 ## 1.3.2 (2026-08-07)
 
 ### Improved

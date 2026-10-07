@@ -81,7 +81,12 @@ export class OutlineSidebar {
 
   /** Apply freshly loaded settings to the live sidebar without remounting it. */
   applySettings(settings: OutlineSettings, previousPosition: Position = this.settings.position): void {
+    const previousColorScheme = this.settings.colorScheme;
     this.settings = settings;
+
+    if (this.mounted && previousColorScheme !== settings.colorScheme) {
+      this.applyTheme();
+    }
 
     if (this.mounted && previousPosition !== settings.position) {
       if (this.opened) {
@@ -698,6 +703,11 @@ export class OutlineSidebar {
    * switch, where a single synchronous read would capture stale colors.
    */
   private repollTheme(): void {
+    if (this.settings.colorScheme !== 'auto') {
+      this.applyTheme();
+      return;
+    }
+
     const wantDark = matchMedia('(prefers-color-scheme: dark)').matches;
     const deadline = performance.now() + 500;
 
@@ -719,9 +729,20 @@ export class OutlineSidebar {
       return;
     }
 
-    const { bg, fg } = this.readEditorColors();
-    const dark = isDarkColor(bg);
+    const editorColors = this.readEditorColors();
+    const scheme = this.settings.colorScheme;
+    const editorIsDark = isDarkColor(editorColors.bg);
+
+    // `auto` follows the editor theme; `light` / `dark` pin the palette regardless of it.
+    const dark = scheme === 'auto' ? editorIsDark : scheme === 'dark';
+    const bg = dark && !editorIsDark ? '#1e1e1e' : editorColors.bg;
+    const fg = scheme === 'auto' || dark === editorIsDark
+      ? editorColors.fg
+      : (dark ? '#f2f2f2' : '#1a1a1a');
     const panelBg = dark ? lighten(bg, 8) : '#fafafa';
+
+    // Keep native bits (scrollbars, etc.) in the same scheme as the panel.
+    this.root.style.colorScheme = scheme === 'auto' ? '' : scheme;
 
     const set = (name: string, value: string) => this.root.style.setProperty(name, value);
     // Panel background: a fixed #fafafa in light mode (a hair off the white

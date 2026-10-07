@@ -21,6 +21,14 @@ export type HighlightMode = 'scroll' | 'insertionPoint';
  */
 export type LaunchBehavior = 'remember' | 'open' | 'closed';
 
+/**
+ * Color scheme of the sidebar:
+ * - `auto`: follow the editor theme (default)
+ * - `light`: always use the light palette
+ * - `dark`: always use the dark palette
+ */
+export type ColorScheme = 'auto' | 'light' | 'dark';
+
 export interface Shortcut {
   key: string;
   modifiers: KeyModifier[];
@@ -33,6 +41,8 @@ export interface OutlineSettings {
   onLaunch: LaunchBehavior;
   /** What drives the highlighted item: the visible section (`scroll`) or the cursor (`insertionPoint`). */
   highlightMode: HighlightMode;
+  /** Color scheme of the sidebar: follow the editor theme (`auto`), or pin it to `light` or `dark`. */
+  colorScheme: ColorScheme;
   /** Keyboard shortcut for the "Toggle Outline Sidebar" menu command. */
   shortcut: Shortcut;
 }
@@ -41,6 +51,7 @@ const DEFAULTS: OutlineSettings = {
   position: 'right',
   onLaunch: 'remember',
   highlightMode: 'scroll',
+  colorScheme: 'auto',
   // ⇧⌘L by default — the native Table of Contents already uses ⇧⌘O.
   shortcut: { key: 'l', modifiers: ['Command', 'Shift'] },
 };
@@ -83,6 +94,7 @@ export function loadSettings(): OutlineSettings {
     position: raw.position === 'left' ? 'left' : DEFAULTS.position,
     onLaunch: raw.onLaunch === 'open' || raw.onLaunch === 'closed' ? raw.onLaunch : DEFAULTS.onLaunch,
     highlightMode: raw.highlightMode === 'insertionPoint' ? 'insertionPoint' : DEFAULTS.highlightMode,
+    colorScheme: raw.colorScheme === 'light' || raw.colorScheme === 'dark' ? raw.colorScheme : DEFAULTS.colorScheme,
     shortcut,
   };
 }
