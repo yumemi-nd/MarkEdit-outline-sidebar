@@ -6,6 +6,10 @@
 
 - `colorScheme` setting (`auto`, `light`, `dark`) to pin the sidebar colors regardless of the editor theme.
 
+### Fixed
+
+- Opening the outline beside full-screen preview no longer leaves a strip of the editor (line numbers) visible between the outline and the preview.
+
 ## 1.3.2 (2026-08-07)
 
 ### Improved

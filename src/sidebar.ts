@@ -433,6 +433,9 @@ export class OutlineSidebar {
       if (signature !== this.modeSignature) {
         this.modeSignature = signature;
         this.updateActive();
+        // Edit / side-by-side shift the body; pure preview only insets the
+        // overlay. Re-apply when the mode changes or the gutter stays visible.
+        this.pushEditor(true);
       }
     });
   }
@@ -652,26 +655,30 @@ export class OutlineSidebar {
     const right = this.settings.position === 'right';
     const body = document.body.style;
     const root = document.documentElement.style;
+    // Pure preview is an absolutely positioned overlay. Shifting <body> moves
+    // the editor's line-number gutter out from under the sidebar, and that
+    // gutter (sticky, z-index above the editor text) stays visible between
+    // the outline and the preview. Inset only the overlay in that mode; the
+    // sidebar is wider than the gutter, so it covers it. Edit and side-by-side
+    // still shrink the body, because those panes live in a grid on <body>.
+    const overlay = open && isPreviewOverlayActive();
 
-    if (open) {
-      // 1. Shrink the content container. In edit / side-by-side modes the
-      //    editor and preview live in a CSS grid on <body>; constraining the
-      //    body width reflows that grid into the space beside the panel.
+    if (open && !overlay) {
       body.width = `calc(100vw - ${width}px)`;
       body.marginLeft = right ? '' : `${width}px`;
       body.marginRight = '';
-      // 2. In pure preview mode the preview pane is absolutely positioned and
-      //    ignores the body box; MarkEdit-preview exposes this CSS variable to
-      //    inset that overlay, so we reserve the panel's edge here too.
-      root.setProperty('--markedit-content-inset', right ? `0 ${width}px 0 0` : `0 0 0 ${width}px`);
-      // 3. Expose the width and, for a left dock, a flag so the active-line
-      //    indicator can be re-offset for the editor's rightward shift (styles.ts).
-      root.setProperty('--meo-width', `${width}px`);
-      document.documentElement.classList.toggle('meo-push-left', !right);
     } else {
       body.width = '';
       body.marginLeft = '';
       body.marginRight = '';
+    }
+
+    if (open) {
+      root.setProperty('--markedit-content-inset', right ? `0 ${width}px 0 0` : `0 0 0 ${width}px`);
+      root.setProperty('--meo-width', `${width}px`);
+      // The active-line counter-shift is only needed when the body itself moved.
+      document.documentElement.classList.toggle('meo-push-left', !right && !overlay);
+    } else {
       root.removeProperty('--markedit-content-inset');
       document.documentElement.classList.remove('meo-push-left');
     }
